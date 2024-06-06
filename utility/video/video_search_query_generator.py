@@ -28,6 +28,14 @@ The list must always contain the most relevant and appropriate query searches.
 ['Un chien', 'une voiture rapide', 'une maison rouge'] <= BAD, because the text query is NOT in English.
   """
 
+def fix_json(json_str):
+    # Replace typographical apostrophes with straight quotes
+    json_str = json_str.replace("’", "'")
+    # Replace any incorrect quotes (e.g., mixed single and double quotes)
+    json_str = json_str.replace("“", "\"").replace("”", "\"").replace("‘", "\"").replace("’", "\"")
+    # Add escaping for quotes within the strings
+    json_str = json_str.replace('"you didn"t"', '"you didn\'t"')
+    return json_str
 
 def getVideoSearchQueriesTimed(script,captions_timed):
     end = captions_timed[-1][0][1]
@@ -40,8 +48,8 @@ def getVideoSearchQueriesTimed(script,captions_timed):
                 out = json.loads(content)
             except Exception as e:
                 print(e)
-                print("not the right format")
-                out = json.loads(content.replace("```json", "").replace("```", ""))
+                content = fix_json(content.replace("```json", "").replace("```", ""))
+                out = json.loads(content)
         return out
     except Exception as e:
         print("error in response",e)

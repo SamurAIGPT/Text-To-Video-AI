@@ -27,28 +27,26 @@ def generate_script(topic):
 
         Keep it brief, highly interesting, and unique.
 
-        Stictly output the script in a JSON format, and only provide a parsable JSON object with the key 'script'.
+        Stictly output the script in a JSON format like below, and only provide a parsable JSON object with the key 'script'.
+
+        # Output
+        {"script": "Here is the script ..."}
         """
     )
 
-    try:
-        response = client.chat.completions.create(
+    response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
                 {"role": "system", "content": prompt},
                 {"role": "user", "content": topic}
             ]
         )
-        content = response.choices[0].message.content
-        try:
-            script = json.loads(content)["script"]
-        except Exception as e:
-            json_start_index = content.find('{')
-            json_end_index = content.rfind('}')
-            content = content[json_start_index+1]
-            script = json.loads(content)["script"]
-        return script
-
+    content = response.choices[0].message.content
+    try:
+        script = json.loads(content)["script"]
     except Exception as e:
-        print(f"An error occurred: {e}")
-        return None
+        json_start_index = content.find('{')
+        json_end_index = content.rfind('}')
+        content = content[json_start_index:json_end_index+1]
+        script = json.loads(content)["script"]
+    return script
