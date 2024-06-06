@@ -27,7 +27,7 @@ def get_program_path(program_name):
     return program_path
 
 def get_output_media(audio_file_path, timed_captions, background_video_data, video_server):
-    OUTPUT_FILE_NAME = "rendered_video_{}.mp4".format(round(time.time()*1000)) 
+    OUTPUT_FILE_NAME = "rendered_video.mp4"
     magick_path = get_program_path("magick")
     print(magick_path)
     if magick_path:
