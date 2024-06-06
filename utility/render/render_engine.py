@@ -32,6 +32,8 @@ def get_output_media(audio_file_path, timed_captions, background_video_data, vid
     print(magick_path)
     if magick_path:
         os.environ['IMAGEMAGICK_BINARY'] = magick_path
+    else:
+        os.environ['IMAGEMAGICK_BINARY'] = '/usr/bin/convert'
     
     visual_clips = []
     for (t1, t2), video_url in background_video_data:

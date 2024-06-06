@@ -69,24 +69,30 @@ Timed Captions:{}
     log_response(LOG_TYPE_GPT,script,text)
     return text
 
-def merge_empty_intervals(intervals):
-    merged_intervals = []
-    current_interval = None
-
-    for interval in intervals:
-        if interval[1] is not None:
-            # If the current interval is not None, add it to the merged_intervals list
-            if current_interval is not None:
-                merged_intervals.append(current_interval)
-            # Start a new current interval
-            current_interval = interval
-        elif current_interval is not None:
-            # If the current interval is None and there's a valid current interval,
-            # extend the end time of the current_interval
-            current_interval[1] = interval[0]
-
-    # Add the last current_interval to the merged_intervals list
-    if current_interval is not None:
-        merged_intervals.append(current_interval)
-
-    return merged_intervals
+def merge_empty_intervals(segments):
+    merged = []
+    i = 0
+    while i < len(segments):
+        interval, url = segments[i]
+        if url is None:
+            # Find consecutive None intervals
+            j = i + 1
+            while j < len(segments) and segments[j][1] is None:
+                j += 1
+            
+            # Merge consecutive None intervals with the previous valid URL
+            if i > 0:
+                prev_interval, prev_url = merged[-1]
+                if prev_url is not None and prev_interval[1] == interval[0]:
+                    merged[-1] = [[prev_interval[0], segments[j-1][0][1]], prev_url]
+                else:
+                    merged.append([interval, prev_url])
+            else:
+                merged.append([interval, None])
+            
+            i = j
+        else:
+            merged.append([interval, url])
+            i += 1
+    
+    return merged
