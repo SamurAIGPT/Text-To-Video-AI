@@ -68,3 +68,13 @@ Timed Captions:{}
     print("Text", text)
     log_response(LOG_TYPE_GPT,script,text)
     return text
+
+def merge_empty_intervals(timestamps_videos):
+    merged = []
+    for interval, url in timestamps_videos:
+        if url is None:
+            if merged:
+                merged[-1][0][1] = interval[1]  # Merge with the previous interval
+        else:
+            merged.append([interval, url])
+    return merged
