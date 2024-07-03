@@ -42,3 +42,9 @@ To generate a video, just click on all the cells one by one. Setup your api keys
 ## 💁 Contribution
 
 As an open-source project we are extremely open to contributions. To get started raise an issue in Github or create a pull request
+
+### Other useful Video AI Projects
+
+[AI Youtube Shorts generator](https://github.com/SamurAIGPT/AI-Youtube-Shorts-Generator/)
+
+[AI B-roll generator](https://github.com/Anil-matcha/AI-B-roll)
