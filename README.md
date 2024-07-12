@@ -47,4 +47,6 @@ As an open-source project we are extremely open to contributions. To get started
 
 [AI Youtube Shorts generator](https://github.com/SamurAIGPT/AI-Youtube-Shorts-Generator/)
 
+[Faceless Video Generator](https://github.com/SamurAIGPT/Faceless-Video-Generator)
+
 [AI B-roll generator](https://github.com/Anil-matcha/AI-B-roll)
