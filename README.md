@@ -50,3 +50,5 @@ As an open-source project we are extremely open to contributions. To get started
 [Faceless Video Generator](https://github.com/SamurAIGPT/Faceless-Video-Generator)
 
 [AI B-roll generator](https://github.com/Anil-matcha/AI-B-roll)
+
+[AI video generator](https://www.vadoo.tv/ai-video-generator)
