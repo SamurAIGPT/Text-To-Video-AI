@@ -52,3 +52,5 @@ As an open-source project we are extremely open to contributions. To get started
 [AI B-roll generator](https://github.com/Anil-matcha/AI-B-roll)
 
 [AI video generator](https://www.vadoo.tv/ai-video-generator)
+
+[Text to Video AI](https://www.vadoo.tv/text-to-video-ai)
