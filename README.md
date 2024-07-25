@@ -8,7 +8,7 @@ Generate video from text using AI
 
 ### Demo Video
 
-https://github.com/SamurAIGPT/Text-To-Video-AI/assets/4326215/57988bbd-5b33-45e0-bbb0-c7eec8b19063
+https://github.com/user-attachments/assets/1e440ace-8560-4e12-850e-c532740711e7
 
 ### 🌟 Show Support
 
