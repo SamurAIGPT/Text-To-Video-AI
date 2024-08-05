@@ -54,3 +54,5 @@ As an open-source project we are extremely open to contributions. To get started
 [AI video generator](https://www.vadoo.tv/ai-video-generator)
 
 [Text to Video AI](https://www.vadoo.tv/text-to-video-ai)
+
+[Autshorts AI](https://www.vadoo.tv/autoshorts-ai)
