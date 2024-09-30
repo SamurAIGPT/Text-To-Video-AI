@@ -53,6 +53,7 @@ def extract_json(content):
         # This will find the first valid JSON array in the response content
         json_match = re.search(r'\[.*\]', content, re.DOTALL)
         if json_match:
+            print(json_match)
             return json.loads(json_match.group(0))
     except Exception as e:
         print("Error parsing JSON:", e)
