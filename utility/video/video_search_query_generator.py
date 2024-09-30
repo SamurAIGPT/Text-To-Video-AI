@@ -59,7 +59,12 @@ def extract_json(content):
             json_str = content[start:end+1]  # Extract everything in between
 
             print(f"Extracted JSON-like content: {json_str}")  # For debugging
-            return json.loads(json_str)
+        try:
+            
+                return json.loads(json_str)
+        except Exception as e:
+            fixeds_s = fix_json(json_str)
+            return json.loads(fixeds_s)
     except Exception as e:
         print("Error parsing JSON:", e)
     return None
