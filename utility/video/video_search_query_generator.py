@@ -50,11 +50,16 @@ def fix_json(json_str):
 
 def extract_json(content):
     try:
-        # This will find the first valid JSON array in the response content
+        # This will find the content between the first "[" and the last "]"
         json_match = re.search(r'\[.*\]', content, re.DOTALL)
         if json_match:
-            print(json_match)
-            return json.loads(json_match.group(0))
+            # Extract the part between the first "[" and the last "]"
+            start = content.index('[')  # First occurrence of "["
+            end = content.rindex(']')   # Last occurrence of "]"
+            json_str = content[start:end+1]  # Extract everything in between
+
+            print(f"Extracted JSON-like content: {json_str}")  # For debugging
+            return json.loads(json_str)
     except Exception as e:
         print("Error parsing JSON:", e)
     return None
