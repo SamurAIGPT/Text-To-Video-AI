@@ -48,29 +48,35 @@ def fix_json(json_str):
     json_str = json_str.replace('"you didn"t"', '"you didn\'t"')
     return json_str
 
-def getVideoSearchQueriesTimed(script,captions_timed):
-    end = captions_timed[-1][0][1]
+def extract_json(content):
     try:
-        
-        out = [[[0,0],""]]
-        while out[-1][0][1] != end:
-            content = call_OpenAI(script,captions_timed).replace("'",'"')
-            try:
-                for i, v in enumerate(content):
-                    if v == "[":
-                        print("json detected from index {i}\n", content[i:])
-                        out = json.loads(content[i:])
-                        break
-            except Exception as e:
-                print("content: \n", content, "\n\n")
-                print(e)
-                content = fix_json(content.replace("```json", "").replace("```", ""))
-                out = json.loads(content)
-        return out
+        # This will find the first valid JSON array in the response content
+        json_match = re.search(r'\[.*\]', content, re.DOTALL)
+        if json_match:
+            return json.loads(json_match.group(0))
     except Exception as e:
-        print("error in response",e)
-   
+        print("Error parsing JSON:", e)
     return None
+
+def getVideoSearchQueriesTimed(script, captions_timed):
+    end = captions_timed[-1][0][1]
+    out = [[[0,0],""]]
+    
+    while out[-1][0][1] != end:
+        try:
+            content = call_OpenAI(script, captions_timed).replace("'", '"')
+            json_data = extract_json(content)
+            
+            if json_data:
+                out = json_data
+                break
+            else:
+                print("Error: Could not parse valid JSON, retrying...")
+        
+        except Exception as e:
+            print(f"Error in response: {e}")
+    
+    return out if out != [[[0,0],""]] else None
 
 def call_OpenAI(script,captions_timed):
     user_content = """Script: {}
