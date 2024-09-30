@@ -35,6 +35,8 @@ The list must always contain the most relevant and appropriate query searches.
 ['Car', 'Car driving', 'Car racing', 'Car parked'] <= BAD, because it's 4 strings.
 ['Fast car'] <= GOOD, because it's 1 string.
 ['Un chien', 'une voiture rapide', 'une maison rouge'] <= BAD, because the text query is NOT in English.
+
+Note: Your response should be Json passable, do not add any extra text to describe the result as your result will be used in a code pipeline automatically
   """
 
 def fix_json(json_str):
@@ -56,7 +58,7 @@ def getVideoSearchQueriesTimed(script,captions_timed):
             try:
                 out = json.loads(content)
             except Exception as e:
-                print("content: n\n", content, "\n\n")
+                print("content: \n", content, "\n\n")
                 print(e)
                 content = fix_json(content.replace("```json", "").replace("```", ""))
                 out = json.loads(content)
