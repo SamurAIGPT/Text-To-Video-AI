@@ -57,7 +57,8 @@ def getVideoSearchQueriesTimed(script,captions_timed):
             content = call_OpenAI(script,captions_timed).replace("'",'"')
             try:
                 for i, v in enumerate(content):
-                    if i == "[":
+                    if v == "[":
+                        print("json detected from index {i}\n", content[i:])
                         out = json.loads(content[i:])
                         break
             except Exception as e:
