@@ -5,8 +5,17 @@ import re
 from datetime import datetime
 from utility.utils import log_response,LOG_TYPE_GPT
 
-OPENAI_API_KEY = os.environ.get('OPENAI_KEY')
-client = OpenAI(api_key=OPENAI_API_KEY)
+if len(os.environ.get("GROQ_API_KEY")) > 30:
+    from groq import Groq
+    model = "llama3-70b-8192"
+    client = Groq(
+        api_key=os.environ.get("GROQ_API_KEY"),
+        )
+else:
+    model = "gpt-4o"
+    OPENAI_API_KEY = os.environ.get('OPENAI_KEY')
+    client = OpenAI(api_key=OPENAI_API_KEY)
+
 log_directory = ".logs/gpt_logs"
 
 prompt = """# Instructions
@@ -26,6 +35,8 @@ The list must always contain the most relevant and appropriate query searches.
 ['Car', 'Car driving', 'Car racing', 'Car parked'] <= BAD, because it's 4 strings.
 ['Fast car'] <= GOOD, because it's 1 string.
 ['Un chien', 'une voiture rapide', 'une maison rouge'] <= BAD, because the text query is NOT in English.
+
+Note: Your response should be the response only and no extra text or data.
   """
 
 def fix_json(json_str):
@@ -47,6 +58,7 @@ def getVideoSearchQueriesTimed(script,captions_timed):
             try:
                 out = json.loads(content)
             except Exception as e:
+                print("content: \n", content, "\n\n")
                 print(e)
                 content = fix_json(content.replace("```json", "").replace("```", ""))
                 out = json.loads(content)
@@ -63,7 +75,7 @@ Timed Captions:{}
     print("Content", user_content)
     
     response = client.chat.completions.create(
-        model="gpt-4o",
+        model= model,
         temperature=1,
         messages=[
             {"role": "system", "content": prompt},

@@ -2,8 +2,16 @@ import os
 from openai import OpenAI
 import json
 
-OPENAI_API_KEY = os.getenv('OPENAI_KEY')
-client = OpenAI(api_key=OPENAI_API_KEY)
+if len(os.environ.get("GROQ_API_KEY")) > 30:
+    from groq import Groq
+    model = "mixtral-8x7b-32768"
+    client = Groq(
+        api_key=os.environ.get("GROQ_API_KEY"),
+        )
+else:
+    OPENAI_API_KEY = os.getenv('OPENAI_KEY')
+    model = "gpt-4o"
+    client = OpenAI(api_key=OPENAI_API_KEY)
 
 def generate_script(topic):
     prompt = (
@@ -35,7 +43,7 @@ def generate_script(topic):
     )
 
     response = client.chat.completions.create(
-            model="gpt-4o",
+            model=model,
             messages=[
                 {"role": "system", "content": prompt},
                 {"role": "user", "content": topic}
@@ -47,6 +55,7 @@ def generate_script(topic):
     except Exception as e:
         json_start_index = content.find('{')
         json_end_index = content.rfind('}')
+        print(content)
         content = content[json_start_index:json_end_index+1]
         script = json.loads(content)["script"]
     return script
