@@ -55,6 +55,7 @@ def generate_script(topic):
     except Exception as e:
         json_start_index = content.find('{')
         json_end_index = content.rfind('}')
+        print(content)
         content = content[json_start_index:json_end_index+1]
         script = json.loads(content)["script"]
     return script
