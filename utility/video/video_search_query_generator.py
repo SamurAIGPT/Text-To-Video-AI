@@ -7,7 +7,7 @@ from utility.utils import log_response,LOG_TYPE_GPT
 
 if len(os.environ.get("GROQ_API_KEY")) > 30:
     from groq import Groq
-    model = "llama3-70b-8192"
+    model = "gemma-7b-it"
     client = Groq(
         api_key=os.environ.get("GROQ_API_KEY"),
         )
@@ -36,7 +36,7 @@ The list must always contain the most relevant and appropriate query searches.
 ['Fast car'] <= GOOD, because it's 1 string.
 ['Un chien', 'une voiture rapide', 'une maison rouge'] <= BAD, because the text query is NOT in English.
 
-Note: Your response should be Json passable, do not add any extra text to describe the result as your result will be used in a code pipeline automatically
+Note: Your response should be Json passable, do not add text extra to describe the result as your result will be used in a code pipeline automatically
   """
 
 def fix_json(json_str):
@@ -48,46 +48,25 @@ def fix_json(json_str):
     json_str = json_str.replace('"you didn"t"', '"you didn\'t"')
     return json_str
 
-def extract_json(content):
-    try:
-        # This will find the content between the first "[" and the last "]"
-        json_match = re.search(r'\[.*\]', content, re.DOTALL)
-        if json_match:
-            # Extract the part between the first "[" and the last "]"
-            start = content.index('[')  # First occurrence of "["
-            end = content.rindex(']')   # Last occurrence of "]"
-            json_str = content[start:end+1]  # Extract everything in between
-
-            print(f"Extracted JSON-like content: {json_str}")  # For debugging
-        try:
-            
-                return json.loads(json_str)
-        except Exception as e:
-            fixeds_s = fix_json(json_str)
-            return json.loads(fixeds_s)
-    except Exception as e:
-        print("Error parsing JSON:", e)
-    return None
-
-def getVideoSearchQueriesTimed(script, captions_timed):
+def getVideoSearchQueriesTimed(script,captions_timed):
     end = captions_timed[-1][0][1]
-    out = [[[0,0],""]]
-    
-    while out[-1][0][1] != end:
-        try:
-            content = call_OpenAI(script, captions_timed).replace("'", '"')
-            json_data = extract_json(content)
-            
-            if json_data:
-                out = json_data
-                break
-            else:
-                print("Error: Could not parse valid JSON, retrying...")
+    try:
         
-        except Exception as e:
-            print(f"Error in response: {e}")
-    
-    return out if out != [[[0,0],""]] else None
+        out = [[[0,0],""]]
+        while out[-1][0][1] != end:
+            content = call_OpenAI(script,captions_timed).replace("'",'"')
+            try:
+                out = json.loads(content)
+            except Exception as e:
+                print("content: \n", content, "\n\n")
+                print(e)
+                content = fix_json(content.replace("```json", "").replace("```", ""))
+                out = json.loads(content)
+        return out
+    except Exception as e:
+        print("error in response",e)
+   
+    return None
 
 def call_OpenAI(script,captions_timed):
     user_content = """Script: {}

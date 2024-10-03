@@ -4,7 +4,7 @@ import json
 
 if len(os.environ.get("GROQ_API_KEY")) > 30:
     from groq import Groq
-    model = "llama3-70b-8192"
+    model = "gemma-7b-it"
     client = Groq(
         api_key=os.environ.get("GROQ_API_KEY"),
         )
