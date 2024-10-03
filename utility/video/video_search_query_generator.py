@@ -36,7 +36,7 @@ The list must always contain the most relevant and appropriate query searches.
 ['Fast car'] <= GOOD, because it's 1 string.
 ['Un chien', 'une voiture rapide', 'une maison rouge'] <= BAD, because the text query is NOT in English.
 
-Note: Your response should be Json passable, do not add text extra to describe the result as your result will be used in a code pipeline automatically
+Note: Your response should be the response only and no extra text or data.
   """
 
 def fix_json(json_str):
