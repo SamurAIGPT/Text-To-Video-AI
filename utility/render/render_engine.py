@@ -4,10 +4,7 @@ import tempfile
 import zipfile
 import platform
 import subprocess
-from moviepy.editor import (AudioFileClip, CompositeVideoClip, CompositeAudioClip, ImageClip,
-                            TextClip, VideoFileClip)
-from moviepy.audio.fx.audio_loop import audio_loop
-from moviepy.audio.fx.audio_normalize import audio_normalize
+from moviepy.editor import (AudioFileClip, CompositeVideoClip, CompositeAudioClip, TextClip, VideoFileClip)
 import requests
 
 def download_file(url, filename):
@@ -43,6 +40,9 @@ def get_output_media(audio_file_path, timed_captions, background_video_data, vid
         
         # Create VideoFileClip from the downloaded file
         video_clip = VideoFileClip(video_filename)
+        
+        # Resize video clip for 9:16 aspect ratio (width: 720, height: 1280)
+        video_clip = video_clip.resize(height=1280)  # Resize while maintaining aspect ratio
         video_clip = video_clip.set_start(t1)
         video_clip = video_clip.set_end(t2)
         visual_clips.append(video_clip)
@@ -52,20 +52,28 @@ def get_output_media(audio_file_path, timed_captions, background_video_data, vid
     audio_clips.append(audio_file_clip)
 
     for (t1, t2), text in timed_captions:
-        text_clip = TextClip(txt=text, fontsize=100, color="white", stroke_width=3, stroke_color="black", method="label")
+        text_clip = TextClip(
+            txt=text, 
+            fontsize=70, 
+            color="white", 
+            stroke_width=3, 
+            stroke_color="black", 
+            method="label", 
+            font="Tahoma"  # Set font to Tahoma
+        )
         text_clip = text_clip.set_start(t1)
         text_clip = text_clip.set_end(t2)
-        text_clip = text_clip.set_position(["center", 800])
+        text_clip = text_clip.set_position(("center", "bottom"))  # Position at the bottom for better visibility
         visual_clips.append(text_clip)
 
-    video = CompositeVideoClip(visual_clips)
+    video = CompositeVideoClip(visual_clips, size=(720, 1280))  # Set the composite video size for 9:16 aspect ratio
     
     if audio_clips:
         audio = CompositeAudioClip(audio_clips)
         video.duration = audio.duration
         video.audio = audio
 
-    video.write_videofile(OUTPUT_FILE_NAME, codec='libx264', audio_codec='aac', fps=25, preset='veryfast')
+    video.write_videofile(OUTPUT_FILE_NAME, codec='libx264', audio_codec='aac', fps=25, preset='fast')
     
     # Clean up downloaded files
     for (t1, t2), video_url in background_video_data:
