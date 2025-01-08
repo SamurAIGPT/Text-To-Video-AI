@@ -58,3 +58,9 @@ As an open-source project we are extremely open to contributions. To get started
 [Text to Video AI](https://www.vadoo.tv/text-to-video-ai)
 
 [Autoshorts AI](https://www.vadoo.tv/autoshorts-ai)
+
+[Pixverse alternative](https://www.vadoo.tv/pixverse-ai)
+
+[Hailuo AI alternative](https://www.vadoo.tv/hailuo-ai)
+
+[Minimax AI alternative](https://www.vadoo.tv/minimax-ai)
