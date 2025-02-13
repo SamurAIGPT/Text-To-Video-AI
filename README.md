@@ -47,6 +47,8 @@ As an open-source project we are extremely open to contributions. To get started
 
 ### Other useful Video AI Projects
 
+[AI Influencer generator](https://github.com/SamurAIGPT/AI-Influencer-Generator)
+
 [AI Youtube Shorts generator](https://github.com/SamurAIGPT/AI-Youtube-Shorts-Generator/)
 
 [Faceless Video Generator](https://github.com/SamurAIGPT/Faceless-Video-Generator)
