@@ -26,7 +26,7 @@ Run the following steps
 export OPENAI_KEY="api-key"
 export PEXELS_KEY="pexels-key"
 
-pip install -r requirements.text
+pip install -r requirements.txt
 
 python app.py "Topic name"
 ```
