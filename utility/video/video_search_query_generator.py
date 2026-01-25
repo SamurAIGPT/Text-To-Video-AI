@@ -106,7 +106,7 @@ Timed Captions:{}
     except json.JSONDecodeError as e:
         print(f"JSON decode error: {e}")
         print(f"Original text length: {len(text)}")
-        print(f"Original text: {text[:500]}")  # Show first 500 chars
+        print(f"Original text: {text[:300]}")  # Show first 300 chars
         
         # Try to find complete JSON array/object by looking for patterns
         # Pattern 1: Complete JSON object enclosed in braces
@@ -129,22 +129,23 @@ Timed Captions:{}
                 try:
                     cleaned_text = text[json_start:json_end+1]
                     parsed = json.loads(cleaned_text)
-                    print(f"Cleaned JSON (braces): {cleaned_text[:200]}")
+                    print(f"Cleaned JSON (braces): {cleaned_text[:300]}")
                     log_response(LOG_TYPE_GPT,script,cleaned_text)
                     return cleaned_text
                 except json.JSONDecodeError:
                     print("Could not repair JSON with brace matching")
         
         # Pattern 2: Handle incomplete JSON at end by completing it
-        # If text ends with incomplete structure, try to complete it
         if text.endswith(','):
             text = text[:-1] + ']'
+        elif text.endswith('], ['):
+            text += ']]'
         elif not text.endswith(']') and '], [[' in text:
             text += ']]'
         
         try:
             parsed = json.loads(text)
-            print(f"Cleaned JSON (completion): {text[:200]}")
+            print(f"Cleaned JSON (completion): {text[:300]}")
             log_response(LOG_TYPE_GPT,script,text)
             return text
         except json.JSONDecodeError:
@@ -152,8 +153,8 @@ Timed Captions:{}
         
         # If all else fails, return a minimal valid JSON structure
         print("Using minimal fallback structure")
-        print(f"Returning first {min(200, len(text))} chars of processed text")
-        return text[:min(len(text), 200)]
+        print(f"Returning first {min(300, len(text))} chars of processed text")
+        return text[:min(len(text), 300)]
 
 def merge_empty_intervals(segments):
     if segments is None:
