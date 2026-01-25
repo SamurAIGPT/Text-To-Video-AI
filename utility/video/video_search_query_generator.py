@@ -1,22 +1,7 @@
-from openai import OpenAI
-import os
 import json
 import re
-from datetime import datetime
-from utility.utils import log_response,LOG_TYPE_GPT
-
-if len(os.environ.get("GROQ_API_KEY")) > 30:
-    from groq import Groq
-    model = "llama3-70b-8192"
-    client = Groq(
-        api_key=os.environ.get("GROQ_API_KEY"),
-        )
-else:
-    model = "gpt-4o"
-    OPENAI_API_KEY = os.environ.get('OPENAI_KEY')
-    client = OpenAI(api_key=OPENAI_API_KEY)
-
-log_directory = ".logs/gpt_logs"
+from utility.config import get_config
+from utility.utils import log_response, LOG_TYPE_GPT
 
 prompt = """# Instructions
 
@@ -69,21 +54,39 @@ def getVideoSearchQueriesTimed(script,captions_timed):
     return None
 
 def call_OpenAI(script,captions_timed):
+    config = get_config()
+    client = config.get_llm_client()
+    model = config.get_llm_model()
+    provider = config.get_llm_provider()
+    
     user_content = """Script: {}
 Timed Captions:{}
 """.format(script,"".join(map(str,captions_timed)))
     print("Content", user_content)
     
-    response = client.chat.completions.create(
-        model= model,
-        temperature=1,
-        messages=[
-            {"role": "system", "content": prompt},
-            {"role": "user", "content": user_content}
-        ]
-    )
+    if provider == 'gemini':
+        response = client.generate_content(
+            contents=[
+                {"role": "user", "parts": [{"text": f"{prompt}\n\n{user_content}"}]}
+            ],
+            generation_config={
+                "temperature": 1.0,
+                "top_p": 0.9,
+                "max_output_tokens": 4096,
+            }
+        )
+        text = response.text.strip()
+    else:
+        response = client.chat.completions.create(
+            model=model,
+            temperature=1,
+            messages=[
+                {"role": "system", "content": prompt},
+                {"role": "user", "content": user_content}
+            ]
+        )
+        text = response.choices[0].message.content.strip()
     
-    text = response.choices[0].message.content.strip()
     text = re.sub('\s+', ' ', text)
     print("Text", text)
     log_response(LOG_TYPE_GPT,script,text)

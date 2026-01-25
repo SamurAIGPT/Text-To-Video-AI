@@ -1,14 +1,15 @@
 import os 
 import requests
 from utility.utils import log_response,LOG_TYPE_PEXEL
-
-PEXELS_API_KEY = os.environ.get('PEXELS_KEY')
+from utility.config import get_config
 
 def search_videos(query_string, orientation_landscape=True):
-   
+    config = get_config()
+    pexels_api_key = config.get_pexels_api_key()
+    
     url = "https://api.pexels.com/videos/search"
     headers = {
-        "Authorization": PEXELS_API_KEY,
+        "Authorization": pexels_api_key,
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
     }
     params = {

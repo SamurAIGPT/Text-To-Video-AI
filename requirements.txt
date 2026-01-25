@@ -7,12 +7,16 @@ certifi==2024.7.4
 charset-normalizer==3.3.2
 Cython==3.0.10
 decorator==4.4.2
+deepgram-sdk==3.7.0
 distro==1.9.0
 dtw-python==1.5.1
 edge-tts==6.1.12
+elevenlabs==2.31.0
 filelock==3.14.0
 frozenlist==1.4.1
 fsspec==2024.6.0
+google-generativeai==0.8.0
+groq==0.11.0
 h11==0.14.0
 httpcore==1.0.5
 httpx==0.27.0
@@ -35,6 +39,7 @@ pillow==10.3.0
 proglog==0.1.10
 pydantic==2.7.3
 pydantic_core==2.18.4
+python-dotenv==1.0.0
 regex==2024.5.15
 requests==2.32.3
 scipy==1.13.1
@@ -47,4 +52,3 @@ typing_extensions==4.12.1
 urllib3==2.2.1
 whisper-timestamped==1.15.4
 yarl==1.9.4
-groq==0.11.0
