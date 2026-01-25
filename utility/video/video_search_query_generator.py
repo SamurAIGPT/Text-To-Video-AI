@@ -97,11 +97,51 @@ Timed Captions:{}
         text = text[:-3]
     
     text = text.strip()
-    print("Text", text)
-    log_response(LOG_TYPE_GPT,script,text)
-    return text
+    
+    try:
+        parsed = json.loads(text)
+        print("Text", text)
+        log_response(LOG_TYPE_GPT,script,text)
+        return text
+    except json.JSONDecodeError as e:
+        print(f"JSON decode error: {e}")
+        print(f"Original text: {text}")
+        
+        # Try to find complete JSON object
+        json_start = text.find('{')
+        json_end = text.rfind('}')
+        
+        if json_start == -1 or json_end == -1:
+            print("Could not find valid JSON object")
+            return text
+        
+        # Find matching braces to handle nested objects
+        brace_count = 0
+        json_end = json_start
+        for i in range(json_start, len(text)):
+            if text[i] == '{':
+                brace_count += 1
+            elif text[i] == '}':
+                brace_count -= 1
+            if brace_count == 0:
+                json_end = i
+                break
+        
+        try:
+            cleaned_text = text[json_start:json_end+1]
+            parsed = json.loads(cleaned_text)
+            print(f"Cleaned JSON: {cleaned_text}")
+            log_response(LOG_TYPE_GPT,script,cleaned_text)
+            return cleaned_text
+        except json.JSONDecodeError:
+            print("Could not repair JSON, returning original")
+            return text
 
 def merge_empty_intervals(segments):
+    if segments is None:
+        print("No background videos available to merge")
+        return None
+    
     merged = []
     i = 0
     while i < len(segments):
