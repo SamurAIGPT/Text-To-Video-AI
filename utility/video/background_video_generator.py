@@ -53,15 +53,15 @@ def getBestVideo(query_string, orientation_landscape=True, used_vids=[]):
     return None
 
 
-def generate_video_url(timed_video_searches,video_server):
+def generate_video_url(timed_video_searches,video_server, orientation_landscape=True):
         timed_video_urls = []
         if video_server == "pexel":
             used_links = []
             for (t1, t2), search_terms in timed_video_searches:
                 url = ""
                 for query in search_terms:
-                  
-                    url = getBestVideo(query, orientation_landscape=True, used_vids=used_links)
+                   
+                    url = getBestVideo(query, orientation_landscape=orientation_landscape, used_vids=used_links)
                     if url:
                         used_links.append(url.split('.hd')[0])
                         break

@@ -163,6 +163,19 @@ class Config:
             raise ConfigurationError("PEXELS_API_KEY not found in .env file")
         return key
     
+    def get_video_orientation(self) -> bool:
+        """
+        Returns True for landscape (horizontal) or False for portrait (vertical)
+        Portrait (vertical, 1080x1920) is recommended for mobile platforms
+        Landscape (horizontal, 1920x1080) is for traditional video
+        """
+        orientation = os.getenv('VIDEO_ORIENTATION', 'portrait').lower()
+        if orientation not in ['portrait', 'landscape']:
+            raise ConfigurationError(
+                f"Invalid VIDEO_ORIENTATION: '{orientation}'. Must be 'portrait' or 'landscape'"
+            )
+        return orientation == 'landscape'
+
     def get_deepgram_api_key(self) -> str:
         key = os.getenv('DEEPGRAM_API_KEY')
         if not key:
