@@ -213,6 +213,11 @@ class Config:
                 f"Invalid CAPTION_POSITION: '{position}'. Must be one of: {', '.join(valid_positions)}"
             )
         return position
+    
+    def get_caption_font_face(self) -> str:
+        """Get caption font face from config (e.g., Arial, Helvetica, Impact, Courier-New)"""
+        return os.getenv('CAPTION_FONT_FACE', 'Arial-Bold')
+
 
 
 def get_config() -> Config:
