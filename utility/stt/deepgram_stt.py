@@ -25,11 +25,10 @@ def generate_timed_captions(audio_filename, api_key=None):
         options = PrerecordedOptions(
             model="nova-2",
             smart_format=True,
-            utterances=True,
             punctuate=True,
-            diarize=False,
-            timestamps=True,
-            paragraphs=False
+            paragraphs=False,
+            utterances=False,
+            diarize=False
         )
         
         response = deepgram.listen.prerecorded.v("1").transcribe_file(payload, options)

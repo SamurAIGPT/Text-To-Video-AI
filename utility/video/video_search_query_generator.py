@@ -70,9 +70,9 @@ Timed Captions:{}
                 {"role": "user", "parts": [{"text": f"{prompt}\n\n{user_content}"}]}
             ],
             generation_config={
-                "temperature": 1.0,
+                "temperature":1.0,
                 "top_p": 0.9,
-                "max_output_tokens": 4096,
+                "max_output_tokens": 8192,
             }
         )
         text = response.text.strip()
@@ -88,6 +88,15 @@ Timed Captions:{}
         text = response.choices[0].message.content.strip()
     
     text = re.sub('\s+', ' ', text)
+    
+    if text.startswith('```json'):
+        text = text[7:]
+    if text.startswith('```'):
+        text = text[3:]
+    if text.endswith('```'):
+        text = text[:-3]
+    
+    text = text.strip()
     print("Text", text)
     log_response(LOG_TYPE_GPT,script,text)
     return text

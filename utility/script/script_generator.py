@@ -71,7 +71,16 @@ def _call_gemini(client, topic, prompt):
         generation_config={
             "temperature": 0.7,
             "top_p": 0.8,
-            "max_output_tokens": 2048,
+            "max_output_tokens": 8192,
         }
     )
-    return response.text
+    text = response.text
+    
+    if text.startswith('```json'):
+        text = text[7:]
+    if text.startswith('```'):
+        text = text[3:]
+    if text.endswith('```'):
+        text = text[:-3]
+    
+    return text.strip()
