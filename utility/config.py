@@ -187,6 +187,32 @@ class Config:
         if not key:
             raise ConfigurationError("ELEVENLABS_API_KEY not found in .env file")
         return key
+    
+    def get_caption_font_size(self) -> int:
+        """Get caption font size from config"""
+        return int(os.getenv('CAPTION_FONT_SIZE', '100'))
+    
+    def get_caption_font_color(self) -> str:
+        """Get caption font color from config"""
+        return os.getenv('CAPTION_FONT_COLOR', 'white').lower()
+    
+    def get_caption_stroke_width(self) -> int:
+        """Get caption stroke/outline width from config"""
+        return int(os.getenv('CAPTION_STROKE_WIDTH', '3'))
+    
+    def get_caption_stroke_color(self) -> str:
+        """Get caption stroke/outline color from config"""
+        return os.getenv('CAPTION_STROKE_COLOR', 'black').lower()
+    
+    def get_caption_position(self) -> str:
+        """Get caption position from config (center, top, bottom, bottom_center, bottom_left, bottom_right)"""
+        position = os.getenv('CAPTION_POSITION', 'bottom_center').lower()
+        valid_positions = ['center', 'top', 'bottom', 'bottom_center', 'bottom_left', 'bottom_right']
+        if position not in valid_positions:
+            raise ConfigurationError(
+                f"Invalid CAPTION_POSITION: '{position}'. Must be one of: {', '.join(valid_positions)}"
+            )
+        return position
 
 
 def get_config() -> Config:

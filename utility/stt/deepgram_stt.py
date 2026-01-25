@@ -93,6 +93,6 @@ def _process_deepgram_words(words):
 
 def _clean_word(word):
     """
-    Clean word by removing special characters except quotes, hyphens, and underscores.
+    Clean word by removing special characters except quotes, hyphens, underscores, and percent signs.
     """
-    return re.sub(r'[^\w\s\-_"\'\']', '', word)
+    return re.sub(r'[^\w\s\-\_%"\'\']', '', word)

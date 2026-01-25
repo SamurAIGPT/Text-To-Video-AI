@@ -41,7 +41,7 @@ def getTimestampMapping(whisper_analysis):
 
 def cleanWord(word):
     
-    return re.sub(r'[^\w\s\-_"\'\']', '', word)
+    return re.sub(r'[^\w\s\-\_%"\'\]', '', word)
 
 
 def interpolateTimeFromDict(word_position, d):
