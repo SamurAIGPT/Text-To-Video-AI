@@ -34,7 +34,7 @@ def getTimestampMapping(whisper_analysis):
     for segment in whisper_analysis['segments']:
         for word in segment['words']:
             newIndex = index + len(word['text'])+1
-            locationToTimestamp[(index, newIndex)] = word['end']
+            locationToTimestamp[(index, newIndex)] = (word['start'], word['end'])
             index = newIndex
     return locationToTimestamp
 
@@ -69,9 +69,9 @@ def getCaptionsWithTime(whisper_analysis, maxCaptionSize=15, considerPunctuation
     
     for word in words:
         position += len(word) + 1
-        end_time = interpolateTimeFromDict(position, wordLocationToTime)
-        if end_time and word:
+        times = interpolateTimeFromDict(position, wordLocationToTime)
+        if times and word:
+            start_time, end_time = times
             CaptionsPairs.append(((start_time, end_time), word))
-            start_time = end_time
 
     return CaptionsPairs
