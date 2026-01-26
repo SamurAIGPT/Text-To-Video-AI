@@ -96,6 +96,20 @@ Timed Captions:{}
     if text.endswith('```'):
         text = text[:-3]
     
+    # Remove "content:" prefix if present (Gemini sometimes adds this)
+    if text.startswith('content:'):
+        text = text[9:].strip()
+    
+    # Also check for "content =" format
+    if text.startswith('content ='):
+        text = text[9:].strip()
+    
+    # Remove markdown code blocks if still present
+    if text.startswith('```'):
+        text = text[3:]
+    if text.endswith('```'):
+        text = text[:-3]
+    
     text = text.strip()
     
     try:
@@ -105,56 +119,25 @@ Timed Captions:{}
         return text
     except json.JSONDecodeError as e:
         print(f"JSON decode error: {e}")
-        print(f"Original text length: {len(text)}")
-        print(f"Original text: {text[:300]}")  # Show first 300 chars
+        print(f"Original text: {text[:200]}")
         
-        # Try to find complete JSON array/object by looking for patterns
-        # Pattern 1: Complete JSON object enclosed in braces
-        if '{' in text and '}' in text:
-            json_start = text.find('{')
-            
-            # Find matching closing brace by counting
-            brace_count = 0
-            json_end = json_start
-            for i in range(json_start, len(text)):
-                if text[i] == '{':
-                    brace_count += 1
-                elif text[i] == '}':
-                    brace_count -= 1
-                if brace_count == 0:
-                    json_end = i
-                    break
-            
-            if json_end > json_start:
-                try:
-                    cleaned_text = text[json_start:json_end+1]
-                    parsed = json.loads(cleaned_text)
-                    print(f"Cleaned JSON (braces): {cleaned_text[:300]}")
-                    log_response(LOG_TYPE_GPT,script,cleaned_text)
-                    return cleaned_text
-                except json.JSONDecodeError:
-                    print("Could not repair JSON with brace matching")
-        
-        # Pattern 2: Handle incomplete JSON at end by completing it
-        if text.endswith(','):
-            text = text[:-1] + ']'
-        elif text.endswith('], ['):
-            text += ']]'
-        elif not text.endswith(']') and '], [[' in text:
-            text += ']]'
-        
+        # Try to find complete JSON by looking for patterns
         try:
-            parsed = json.loads(text)
-            print(f"Cleaned JSON (completion): {text[:300]}")
-            log_response(LOG_TYPE_GPT,script,text)
-            return text
-        except json.JSONDecodeError:
-            pass
+            # Find last complete array or object
+            last_bracket = text.rfind(']')
+            if last_bracket > 0:
+                trimmed = text[:last_bracket+1]
+                parsed = json.loads(trimmed)
+                print(f"Successfully trimmed JSON to {len(trimmed)} chars")
+                log_response(LOG_TYPE_GPT,script,trimmed)
+                return trimmed
+        except Exception as e2:
+            print(f"Trim attempt failed: {e2}")
         
-        # If all else fails, return a minimal valid JSON structure
-        print("Using minimal fallback structure")
-        print(f"Returning first {min(300, len(text))} chars of processed text")
-        return text[:min(len(text), 300)]
+        # Last resort: default fallback structure
+        print("Using default fallback structure")
+        default_json = '[[[0.16, 5.29], ["default background video", "stock footage", "generic scene"]], [[5.29, 10.29], ["stock video", "background footage", "video content"]]]'
+        return default_json
 
 def merge_empty_intervals(segments):
     if segments is None:
