@@ -28,12 +28,14 @@ def splitWordsBySize(words, maxCaptionSize):
 
 
 def getTimestampMapping(whisper_analysis):
-    
     index = 0
     locationToTimestamp = {}
+    text = whisper_analysis['text']
+    
     for segment in whisper_analysis['segments']:
         for word in segment['words']:
-            newIndex = index + len(word['text'])+1
+            clean_text = cleanWord(word['text'])
+            newIndex = index + len(clean_text)+1
             locationToTimestamp[(index, newIndex)] = (word['start'], word['end'])
             index = newIndex
     return locationToTimestamp
@@ -54,24 +56,12 @@ def interpolateTimeFromDict(word_position, d):
 
 def getCaptionsWithTime(whisper_analysis, maxCaptionSize=15, considerPunctuation=False):
     
-    wordLocationToTime = getTimestampMapping(whisper_analysis)
-    position = 0
-    start_time = 0
     CaptionsPairs = []
-    text = whisper_analysis['text']
     
-    if considerPunctuation:
-        sentences = re.split(r'(?<=[.!?]) +', text)
-        words = [word for sentence in sentences for word in splitWordsBySize(sentence.split(), maxCaptionSize)]
-    else:
-        words = text.split()
-        words = [cleanWord(word) for word in splitWordsBySize(words, maxCaptionSize)]
+    for segment in whisper_analysis['segments']:
+        for word_info in segment['words']:
+            clean_word = cleanWord(word_info['text'])
+            if clean_word and word_info['start'] < word_info['end']:
+                CaptionsPairs.append(((word_info['start'], word_info['end']), clean_word))
     
-    for word in words:
-        position += len(word) + 1
-        times = interpolateTimeFromDict(position, wordLocationToTime)
-        if times and word:
-            start_time, end_time = times
-            CaptionsPairs.append(((start_time, end_time), word))
-
     return CaptionsPairs
