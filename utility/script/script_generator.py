@@ -42,13 +42,26 @@ def generate_script(topic):
         content = _call_openai_groq(client, model, topic, prompt)
     
     try:
-        script = json.loads(content)["script"]
+        # Remove any common prefix that might be added by LLMs (content:, content =, content=, content: , etc.)
+        text = content
+        for prefix in ['content:', 'content =', 'content =', 'content: ', 'content=']:
+            if text.startswith(prefix):
+                text = text[len(prefix):].strip()
+                break
+        
+        # Try to find complete JSON object or array
+        json_start = text.find('{')
+        json_end = text.rfind('}')
+        
+        if json_start == -1 or json_end == -1:
+            raise ValueError("No valid JSON found in response")
+        
+        script_text = text[json_start:json_end+1]
+        script = json.loads(script_text)["script"]
+        return script
     except Exception as e:
-        json_start_index = content.find('{')
-        json_end_index = content.rfind('}')
-        print(content)
-        content = content[json_start_index:json_end_index+1]
-        script = json.loads(content)["script"]
+        print(f"Error: {e}")
+        raise
     return script
 
 
