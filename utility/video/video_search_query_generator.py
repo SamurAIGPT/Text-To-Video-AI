@@ -35,18 +35,35 @@ def fix_json(json_str):
 
 def getVideoSearchQueriesTimed(script,captions_timed):
     end = captions_timed[-1][0][1]
+    max_retries = 3
+    retry_count = 0
+    
     try:
-        
         out = [[[0,0],""]]
         while out[-1][0][1] != end:
+            if retry_count >= max_retries:
+                print(f"Max retries ({max_retries}) reached. Using current result or fallback.")
+                if out == [[[0,0],""]]:
+                    return None
+                return out
+            
             content = call_OpenAI(script,captions_timed).replace("'",'"')
             try:
                 out = json.loads(content)
             except Exception as e:
-                print("content: \n", content, "\n\n")
+                print("JSON parse error, attempting to fix...")
                 print(e)
-                content = fix_json(content.replace("```json", "").replace("```", ""))
-                out = json.loads(content)
+                try:
+                    content = fix_json(content.replace("```json", "").replace("```", ""))
+                    out = json.loads(content)
+                except Exception as e2:
+                    print(f"Failed to fix JSON: {e2}")
+                    retry_count += 1
+                    continue
+            
+            if out[-1][0][1] != end:
+                retry_count += 1
+        
         return out
     except Exception as e:
         print("error in response",e)

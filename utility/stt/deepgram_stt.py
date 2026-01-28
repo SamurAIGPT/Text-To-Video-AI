@@ -59,9 +59,10 @@ def _process_deepgram_words(words):
     captions = []
     
     max_caption_size = 15
-    half_caption_size = max_caption_size / 2
     
     i = 0
+    end_time = 0
+    
     while i < len(words):
         current_caption = words[i].word.strip()
         start_time = words[i].start
@@ -74,13 +75,17 @@ def _process_deepgram_words(words):
                 end_time = words[j].end
                 j += 1
                 
-                if len(current_caption) >= half_caption_size and j < len(words):
+                if len(current_caption) >= 10 and j < len(words):
                     break
             else:
                 break
         
-        if not end_time:
+        if end_time == 0:
             end_time = words[j-1].end
+        
+        # Fix invalid timestamps
+        if start_time >= end_time:
+            end_time = start_time + 0.3
         
         caption_text = _clean_word(current_caption)
         if caption_text:

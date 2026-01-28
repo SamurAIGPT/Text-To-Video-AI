@@ -43,7 +43,7 @@ def getTimestampMapping(whisper_analysis):
 
 def cleanWord(word):
     
-    return re.sub(r'[^\w\s\-\_%"\'\]', '', word)
+    return re.sub(r'[^\w\s\-_%\']', '', word)
 
 
 def interpolateTimeFromDict(word_position, d):
@@ -57,11 +57,26 @@ def interpolateTimeFromDict(word_position, d):
 def getCaptionsWithTime(whisper_analysis, maxCaptionSize=15, considerPunctuation=False):
     
     CaptionsPairs = []
+    last_end = 0
     
     for segment in whisper_analysis['segments']:
         for word_info in segment['words']:
             clean_word = cleanWord(word_info['text'])
-            if clean_word and word_info['start'] < word_info['end']:
-                CaptionsPairs.append(((word_info['start'], word_info['end']), clean_word))
+            if clean_word:
+                start = word_info['start']
+                end = word_info['end']
+                
+                # Fix all timestamp issues including multiple words with same end time
+                # Check if there's any problem: zero duration, backwards, or overlap
+                if start >= end or start < last_end or end <= last_end:
+                    # Set start from last_end to ensure sequential order
+                    start = last_end
+                    # Set end slightly forward to ensure minimum duration
+                    end = last_end + 0.3
+                
+                # Update last_end for next word
+                last_end = end
+                
+                CaptionsPairs.append(((start, end), clean_word))
     
     return CaptionsPairs
