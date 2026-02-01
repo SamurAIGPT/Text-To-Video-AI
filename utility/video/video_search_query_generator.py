@@ -1,22 +1,7 @@
-from openai import OpenAI
-import os
 import json
 import re
-from datetime import datetime
-from utility.utils import log_response,LOG_TYPE_GPT
-
-if len(os.environ.get("GROQ_API_KEY")) > 30:
-    from groq import Groq
-    model = "llama3-70b-8192"
-    client = Groq(
-        api_key=os.environ.get("GROQ_API_KEY"),
-        )
-else:
-    model = "gpt-4o"
-    OPENAI_API_KEY = os.environ.get('OPENAI_KEY')
-    client = OpenAI(api_key=OPENAI_API_KEY)
-
-log_directory = ".logs/gpt_logs"
+from utility.config import get_config
+from utility.utils import log_response, LOG_TYPE_GPT
 
 prompt = """# Instructions
 
@@ -50,18 +35,35 @@ def fix_json(json_str):
 
 def getVideoSearchQueriesTimed(script,captions_timed):
     end = captions_timed[-1][0][1]
+    max_retries = 3
+    retry_count = 0
+    
     try:
-        
         out = [[[0,0],""]]
         while out[-1][0][1] != end:
+            if retry_count >= max_retries:
+                print(f"Max retries ({max_retries}) reached. Using current result or fallback.")
+                if out == [[[0,0],""]]:
+                    return None
+                return out
+            
             content = call_OpenAI(script,captions_timed).replace("'",'"')
             try:
                 out = json.loads(content)
             except Exception as e:
-                print("content: \n", content, "\n\n")
+                print("JSON parse error, attempting to fix...")
                 print(e)
-                content = fix_json(content.replace("```json", "").replace("```", ""))
-                out = json.loads(content)
+                try:
+                    content = fix_json(content.replace("```json", "").replace("```", ""))
+                    out = json.loads(content)
+                except Exception as e2:
+                    print(f"Failed to fix JSON: {e2}")
+                    retry_count += 1
+                    continue
+            
+            if out[-1][0][1] != end:
+                retry_count += 1
+        
         return out
     except Exception as e:
         print("error in response",e)
@@ -69,27 +71,96 @@ def getVideoSearchQueriesTimed(script,captions_timed):
     return None
 
 def call_OpenAI(script,captions_timed):
+    config = get_config()
+    client = config.get_llm_client()
+    model = config.get_llm_model()
+    provider = config.get_llm_provider()
+    
     user_content = """Script: {}
 Timed Captions:{}
 """.format(script,"".join(map(str,captions_timed)))
     print("Content", user_content)
     
-    response = client.chat.completions.create(
-        model= model,
-        temperature=1,
-        messages=[
-            {"role": "system", "content": prompt},
-            {"role": "user", "content": user_content}
-        ]
-    )
+    if provider == 'gemini':
+        response = client.generate_content(
+            contents=[
+                {"role": "user", "parts": [{"text": f"{prompt}\n\n{user_content}"}]}
+            ],
+            generation_config={
+                "temperature":1.0,
+                "top_p": 0.9,
+                "max_output_tokens": 8192,
+            }
+        )
+        text = response.text.strip()
+    else:
+        response = client.chat.completions.create(
+            model=model,
+            temperature=1,
+            messages=[
+                {"role": "system", "content": prompt},
+                {"role": "user", "content": user_content}
+            ]
+        )
+        text = response.choices[0].message.content.strip()
     
-    text = response.choices[0].message.content.strip()
     text = re.sub('\s+', ' ', text)
-    print("Text", text)
-    log_response(LOG_TYPE_GPT,script,text)
-    return text
+    
+    if text.startswith('```json'):
+        text = text[7:]
+    if text.startswith('```'):
+        text = text[3:]
+    if text.endswith('```'):
+        text = text[:-3]
+    
+    # Remove "content:" prefix if present (Gemini sometimes adds this)
+    if text.startswith('content:'):
+        text = text[9:].strip()
+    
+    # Also check for "content =" format
+    if text.startswith('content ='):
+        text = text[9:].strip()
+    
+    # Remove markdown code blocks if still present
+    if text.startswith('```'):
+        text = text[3:]
+    if text.endswith('```'):
+        text = text[:-3]
+    
+    text = text.strip()
+    
+    try:
+        parsed = json.loads(text)
+        print("Text", text)
+        log_response(LOG_TYPE_GPT,script,text)
+        return text
+    except json.JSONDecodeError as e:
+        print(f"JSON decode error: {e}")
+        print(f"Original text: {text[:200]}")
+        
+        # Try to find complete JSON by looking for patterns
+        try:
+            # Find last complete array or object
+            last_bracket = text.rfind(']')
+            if last_bracket > 0:
+                trimmed = text[:last_bracket+1]
+                parsed = json.loads(trimmed)
+                print(f"Successfully trimmed JSON to {len(trimmed)} chars")
+                log_response(LOG_TYPE_GPT,script,trimmed)
+                return trimmed
+        except Exception as e2:
+            print(f"Trim attempt failed: {e2}")
+        
+        # Last resort: default fallback structure
+        print("Using default fallback structure")
+        default_json = '[[[0.16, 5.29], ["default background video", "stock footage", "generic scene"]], [[5.29, 10.29], ["stock video", "background footage", "video content"]]]'
+        return default_json
 
 def merge_empty_intervals(segments):
+    if segments is None:
+        print("No background videos available to merge")
+        return None
+    
     merged = []
     i = 0
     while i < len(segments):

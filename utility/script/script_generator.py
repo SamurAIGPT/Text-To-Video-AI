@@ -1,19 +1,40 @@
-import os
-from openai import OpenAI
 import json
+from utility.config import get_config
 
-if len(os.environ.get("GROQ_API_KEY")) > 30:
-    from groq import Groq
-    model = "mixtral-8x7b-32768"
-    client = Groq(
-        api_key=os.environ.get("GROQ_API_KEY"),
-        )
-else:
-    OPENAI_API_KEY = os.getenv('OPENAI_KEY')
-    model = "gpt-4o"
-    client = OpenAI(api_key=OPENAI_API_KEY)
+
+def clean_markdown(text):
+    """Remove markdown formatting from text to prevent TTS issues."""
+    import re
+    
+    # Remove bold formatting (**text**)
+    text = re.sub(r'\*\*(.*?)\*\*', r'\1', text)
+    
+    # Remove italic formatting (*text* or _text_)
+    text = re.sub(r'\*(.*?)\*', r'\1', text)
+    text = re.sub(r'_(.*?)_', r'\1', text)
+    
+    # Remove code formatting (`text` or ```text```)
+    text = re.sub(r'`(.*?)`', r'\1', text)
+    text = re.sub(r'```.*?```', '', text, flags=re.DOTALL)
+    
+    # Remove headers (# text)
+    text = re.sub(r'^#+\s+', '', text, flags=re.MULTILINE)
+    
+    # Remove links [text](url) -> text
+    text = re.sub(r'\[(.*?)\]\(.*?\)', r'\1', text)
+    
+    # Clean up extra whitespace
+    text = re.sub(r'\s+', ' ', text)
+    
+    return text.strip()
+
 
 def generate_script(topic):
+    config = get_config()
+    client = config.get_llm_client()
+    model = config.get_llm_model()
+    provider = config.get_llm_provider()
+    
     prompt = (
         """You are a seasoned content writer for a YouTube Shorts channel, specializing in facts videos. 
         Your facts shorts are concise, each lasting less than 50 seconds (approximately 140 words). 
@@ -41,21 +62,66 @@ def generate_script(topic):
         {"script": "Here is the script ..."}
         """
     )
-
-    response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": prompt},
-                {"role": "user", "content": topic}
-            ]
-        )
-    content = response.choices[0].message.content
+    
+    if provider == 'gemini':
+        content = _call_gemini(client, topic, prompt)
+    else:
+        content = _call_openai_groq(client, model, topic, prompt)
+    
     try:
-        script = json.loads(content)["script"]
+        # Remove any common prefix that might be added by LLMs (content:, content =, content=, content: , etc.)
+        text = content
+        for prefix in ['content:', 'content =', 'content =', 'content: ', 'content=']:
+            if text.startswith(prefix):
+                text = text[len(prefix):].strip()
+                break
+        
+        # Try to find complete JSON object or array
+        json_start = text.find('{')
+        json_end = text.rfind('}')
+        
+        if json_start == -1 or json_end == -1:
+            raise ValueError("No valid JSON found in response")
+        
+        script_text = text[json_start:json_end+1]
+        script = json.loads(script_text)["script"]
+        script = clean_markdown(script)
+        return script
     except Exception as e:
-        json_start_index = content.find('{')
-        json_end_index = content.rfind('}')
-        print(content)
-        content = content[json_start_index:json_end_index+1]
-        script = json.loads(content)["script"]
+        print(f"Error: {e}")
+        raise
     return script
+
+
+def _call_openai_groq(client, model, topic, prompt):
+    response = client.chat.completions.create(
+        model=model,
+        messages=[
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": topic}
+        ]
+    )
+    return response.choices[0].message.content
+
+
+def _call_gemini(client, topic, prompt):
+    response = client.generate_content(
+        contents=[
+            {"role": "user", "parts": [{"text": f"{prompt}\n\nTopic: {topic}"}]}
+        ],
+        generation_config={
+            "temperature": 0.7,
+            "top_p": 0.8,
+            "max_output_tokens": 8192,
+        }
+    )
+    text = response.text
+    
+    if text.startswith('```json'):
+        text = text[7:]
+    if text.startswith('```'):
+        text = text[3:]
+    if text.endswith('```'):
+        text = text[:-3]
+    
+    return text.strip()

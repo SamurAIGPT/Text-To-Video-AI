@@ -10,6 +10,7 @@ from utility.captions.timed_captions_generator import generate_timed_captions
 from utility.video.background_video_generator import generate_video_url
 from utility.render.render_engine import get_output_media
 from utility.video.video_search_query_generator import getVideoSearchQueriesTimed, merge_empty_intervals
+from utility.config import get_config
 import argparse
 
 if __name__ == "__main__":
@@ -20,6 +21,9 @@ if __name__ == "__main__":
     SAMPLE_TOPIC = args.topic
     SAMPLE_FILE_NAME = "audio_tts.wav"
     VIDEO_SERVER = "pexel"
+    
+    config = get_config()
+    orientation_landscape = config.get_video_orientation()
 
     response = generate_script(SAMPLE_TOPIC)
     print("script: {}".format(response))
@@ -34,7 +38,7 @@ if __name__ == "__main__":
 
     background_video_urls = None
     if search_terms is not None:
-        background_video_urls = generate_video_url(search_terms, VIDEO_SERVER)
+        background_video_urls = generate_video_url(search_terms, VIDEO_SERVER, orientation_landscape=orientation_landscape)
         print(background_video_urls)
     else:
         print("No background video")

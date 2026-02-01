@@ -18,15 +18,38 @@ If you enjoy using Text to Video AI, we'd appreciate your support with a star тн
 
 [![GitHub star chart](https://img.shields.io/github/stars/SamurAIGPT/Text-To-Video-AI?style=social)](https://github.com/SamurAIGPT/Text-To-Video-AI/stargazers)
 
+## Configuration
+
+Create a `.env` file in the project root based on `.env.example`. This file contains all API keys and provider selections.
+
+### Required API Keys
+
+You'll need to sign up for the following services based on your chosen providers:
+
+- **OpenAI**: https://platform.openai.com/api-keys
+- **Groq**: https://console.groq.com/keys
+- **Google Gemini**: https://makersuite.google.com/app/apikey
+- **Deepgram**: https://console.deepgram.com/
+- **ElevenLabs**: https://elevenlabs.io/
+- **Pexels**: https://www.pexels.com/api/new/
+
+### Provider Selection
+
+Set the provider in your `.env` file:
+- `LLM_PROVIDER`: Choose between openai, groq, or gemini
+- `STT_PROVIDER`: Choose between whisper or deepgram
+- `TTS_PROVIDER`: Choose between edgetts or elevenlabs
+
 ### Steps to run
 
 Run the following steps
 
 ```
-export OPENAI_KEY="api-key"
-export PEXELS_KEY="pexels-key"
+pip install -r requirements.txt
 
-pip install -r requirements.text
+# Create and configure your .env file
+cp .env.example .env
+# Edit .env with your API keys
 
 python app.py "Topic name"
 ```

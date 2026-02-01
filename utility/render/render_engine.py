@@ -5,10 +5,11 @@ import zipfile
 import platform
 import subprocess
 from moviepy.editor import (AudioFileClip, CompositeVideoClip, CompositeAudioClip, ImageClip,
-                            TextClip, VideoFileClip)
+                              TextClip, VideoFileClip)
 from moviepy.audio.fx.audio_loop import audio_loop
 from moviepy.audio.fx.audio_normalize import audio_normalize
 import requests
+from utility.config import get_config
 
 def download_file(url, filename):
     with open(filename, 'wb') as f:
@@ -30,6 +31,7 @@ def get_program_path(program_name):
     return program_path
 
 def get_output_media(audio_file_path, timed_captions, background_video_data, video_server):
+    config = get_config()
     OUTPUT_FILE_NAME = "rendered_video.mp4"
     magick_path = get_program_path("magick")
     print(magick_path)
@@ -40,11 +42,11 @@ def get_output_media(audio_file_path, timed_captions, background_video_data, vid
     
     visual_clips = []
     for (t1, t2), video_url in background_video_data:
-        # Download the video file
+        # Download video file
         video_filename = tempfile.NamedTemporaryFile(delete=False).name
         download_file(video_url, video_filename)
         
-        # Create VideoFileClip from the downloaded file
+        # Create VideoFileClip from downloaded file
         video_clip = VideoFileClip(video_filename)
         video_clip = video_clip.set_start(t1)
         video_clip = video_clip.set_end(t2)
@@ -53,14 +55,37 @@ def get_output_media(audio_file_path, timed_captions, background_video_data, vid
     audio_clips = []
     audio_file_clip = AudioFileClip(audio_file_path)
     audio_clips.append(audio_file_clip)
-
+    
     for (t1, t2), text in timed_captions:
-        text_clip = TextClip(txt=text, fontsize=100, color="white", stroke_width=3, stroke_color="black", method="label")
+        # Get caption styling from config
+        font_size = config.get_caption_font_size()
+        font_color = config.get_caption_font_color()
+        stroke_width = config.get_caption_stroke_width()
+        stroke_color = config.get_caption_stroke_color()
+        font_face = config.get_caption_font_face()
+        caption_position = config.get_caption_position()
+        
+        # Convert caption position string to MoviePy format
+        # For 1080p video: top=100, center=540, bottom=1000
+        if caption_position == 'bottom_center':
+            position = ["center", 1000]
+        elif caption_position == 'bottom_left':
+            position = ["left", 1000]
+        elif caption_position == 'bottom_right':
+            position = ["right", 1000]
+        elif caption_position == 'top':
+            position = ["center", 100]
+        elif caption_position == 'center':
+            position = ["center", 540]
+        else: # Default to bottom_center
+            position = ["center", 1000]
+        
+        text_clip = TextClip(txt=text, font=font_face, fontsize=font_size, color=font_color, stroke_width=stroke_width, stroke_color=stroke_color, method="label")
         text_clip = text_clip.set_start(t1)
         text_clip = text_clip.set_end(t2)
-        text_clip = text_clip.set_position(["center", 800])
+        text_clip = text_clip.set_position(position)
         visual_clips.append(text_clip)
-
+    
     video = CompositeVideoClip(visual_clips)
     
     if audio_clips:

@@ -1,14 +1,15 @@
 import os 
 import requests
 from utility.utils import log_response,LOG_TYPE_PEXEL
-
-PEXELS_API_KEY = os.environ.get('PEXELS_KEY')
+from utility.config import get_config
 
 def search_videos(query_string, orientation_landscape=True):
-   
+    config = get_config()
+    pexels_api_key = config.get_pexels_api_key()
+    
     url = "https://api.pexels.com/videos/search"
     headers = {
-        "Authorization": PEXELS_API_KEY,
+        "Authorization": pexels_api_key,
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
     }
     params = {
@@ -52,15 +53,15 @@ def getBestVideo(query_string, orientation_landscape=True, used_vids=[]):
     return None
 
 
-def generate_video_url(timed_video_searches,video_server):
+def generate_video_url(timed_video_searches,video_server, orientation_landscape=True):
         timed_video_urls = []
         if video_server == "pexel":
             used_links = []
             for (t1, t2), search_terms in timed_video_searches:
                 url = ""
                 for query in search_terms:
-                  
-                    url = getBestVideo(query, orientation_landscape=True, used_vids=used_links)
+                   
+                    url = getBestVideo(query, orientation_landscape=orientation_landscape, used_vids=used_links)
                     if url:
                         used_links.append(url.split('.hd')[0])
                         break
