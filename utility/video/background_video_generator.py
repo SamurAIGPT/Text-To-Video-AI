@@ -6,7 +6,7 @@ from utility.config import get_config
 def search_videos(query_string, orientation_landscape=True):
     config = get_config()
     pexels_api_key = config.get_pexels_api_key()
-    
+
     url = "https://api.pexels.com/videos/search"
     headers = {
         "Authorization": pexels_api_key,
@@ -21,7 +21,15 @@ def search_videos(query_string, orientation_landscape=True):
     response = requests.get(url, headers=headers, params=params)
     json_data = response.json()
     log_response(LOG_TYPE_PEXEL,query_string,response.json())
-   
+
+    # Check for API errors
+    if response.status_code != 200:
+        error_msg = json_data.get('error', f'HTTP {response.status_code}')
+        raise Exception(f"Pexels API error: {error_msg}. Please check your PEXELS_API_KEY in .env file.")
+
+    if 'videos' not in json_data:
+        raise Exception("Pexels API returned unexpected response (no 'videos' field). Please check your PEXELS_API_KEY in .env file.")
+
     return json_data
 
 
