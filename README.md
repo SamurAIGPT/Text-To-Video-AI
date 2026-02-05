@@ -189,6 +189,9 @@ Looking for a production-ready solution? Our [Premium API](https://docs.vadoo.tv
 - [AI Video Generator](https://www.vadoo.tv/ai-video-generator)
 - [Text to Video AI](https://www.vadoo.tv/text-to-video-ai)
 - [Autoshorts AI](https://www.vadoo.tv/autoshorts-ai)
+- [Pixverse Alternative](https://www.vadoo.tv/pixverse-ai)
+- [Hailuo AI Alternative](https://www.vadoo.tv/hailuo-ai)
+- [Minimax AI Alternative](https://www.vadoo.tv/minimax-ai)
 
 ---
 
