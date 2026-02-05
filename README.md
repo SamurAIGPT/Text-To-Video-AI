@@ -42,7 +42,9 @@ Set the provider in your `.env` file:
 
 ### Steps to run
 
-Run the following steps
+**Windows users:** See [INSTALL_WINDOWS.md](INSTALL_WINDOWS.md) for detailed setup instructions including FFmpeg and ImageMagick installation.
+
+Run the following steps:
 
 ```
 pip install -r requirements.txt
