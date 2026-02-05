@@ -2,7 +2,7 @@
 
 Generate video from text using AI
 
-If you wish to add Text to Video into your application, here is an api to create video from text :- https://docs.vadoo.tv/docs/guide/create-an-ai-video
+> **🚀 Want to skip the setup?** Use our [Premium API](https://docs.vadoo.tv/docs/guide/ai-story/create-an-ai-video) to generate videos instantly - no installation required, production-ready, and scales with your needs.
 
 ### Youtube Tutorial -> https://www.youtube.com/watch?v=AXo6VfRUgic
 
@@ -60,8 +60,12 @@ Output will be generated in rendered_video.mp4
 
 ### Quick Start
 
-Without going through the installation hastle here is a simple way to generate videos from text
+Without going through the installation hassle here is a simple way to generate videos from text
 
+**Option 1: Use the API (Recommended)**
+Skip all setup and use our [Premium API](https://docs.vadoo.tv/docs/guide/ai-story/create-an-ai-video) - instant video generation with a single API call.
+
+**Option 2: Google Colab**
 For a simple way to run the code, checkout the [colab link](/Text_to_Video_example.ipynb)
 
 To generate a video, just click on all the cells one by one. Setup your api keys for openai and pexels
@@ -69,6 +73,14 @@ To generate a video, just click on all the cells one by one. Setup your api keys
 ## 💁 Contribution
 
 As an open-source project we are extremely open to contributions. To get started raise an issue in Github or create a pull request
+
+---
+
+### 🎬 Need a Production-Ready Solution?
+
+Check out our [Premium API](https://docs.vadoo.tv/docs/guide/ai-story/create-an-ai-video) for enterprise-grade video generation with advanced features, multiple formats, voice options, and more.
+
+---
 
 ### Other useful Video AI Projects
 
