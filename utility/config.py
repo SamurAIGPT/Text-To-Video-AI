@@ -188,6 +188,10 @@ class Config:
             raise ConfigurationError("ELEVENLABS_API_KEY not found in .env file")
         return key
     
+    def get_captions_enabled(self) -> bool:
+        """Get whether captions are enabled"""
+        return os.getenv('CAPTIONS_ENABLED', 'true').lower() == 'true'
+
     def get_caption_font_size(self) -> int:
         """Get caption font size from config"""
         return int(os.getenv('CAPTION_FONT_SIZE', '100'))

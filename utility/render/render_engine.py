@@ -56,35 +56,37 @@ def get_output_media(audio_file_path, timed_captions, background_video_data, vid
     audio_file_clip = AudioFileClip(audio_file_path)
     audio_clips.append(audio_file_clip)
     
-    for (t1, t2), text in timed_captions:
-        # Get caption styling from config
-        font_size = config.get_caption_font_size()
-        font_color = config.get_caption_font_color()
-        stroke_width = config.get_caption_stroke_width()
-        stroke_color = config.get_caption_stroke_color()
-        font_face = config.get_caption_font_face()
-        caption_position = config.get_caption_position()
-        
-        # Convert caption position string to MoviePy format
-        # For 1080p video: top=100, center=540, bottom=1000
-        if caption_position == 'bottom_center':
-            position = ["center", 1000]
-        elif caption_position == 'bottom_left':
-            position = ["left", 1000]
-        elif caption_position == 'bottom_right':
-            position = ["right", 1000]
-        elif caption_position == 'top':
-            position = ["center", 100]
-        elif caption_position == 'center':
-            position = ["center", 540]
-        else: # Default to bottom_center
-            position = ["center", 1000]
-        
-        text_clip = TextClip(txt=text, font=font_face, fontsize=font_size, color=font_color, stroke_width=stroke_width, stroke_color=stroke_color, method="label")
-        text_clip = text_clip.set_start(t1)
-        text_clip = text_clip.set_end(t2)
-        text_clip = text_clip.set_position(position)
-        visual_clips.append(text_clip)
+    # Only add captions if enabled in config
+    if config.get_captions_enabled():
+        for (t1, t2), text in timed_captions:
+            # Get caption styling from config
+            font_size = config.get_caption_font_size()
+            font_color = config.get_caption_font_color()
+            stroke_width = config.get_caption_stroke_width()
+            stroke_color = config.get_caption_stroke_color()
+            font_face = config.get_caption_font_face()
+            caption_position = config.get_caption_position()
+
+            # Convert caption position string to MoviePy format
+            # For 1080p video: top=100, center=540, bottom=1000
+            if caption_position == 'bottom_center':
+                position = ["center", 1000]
+            elif caption_position == 'bottom_left':
+                position = ["left", 1000]
+            elif caption_position == 'bottom_right':
+                position = ["right", 1000]
+            elif caption_position == 'top':
+                position = ["center", 100]
+            elif caption_position == 'center':
+                position = ["center", 540]
+            else: # Default to bottom_center
+                position = ["center", 1000]
+
+            text_clip = TextClip(txt=text, font=font_face, fontsize=font_size, color=font_color, stroke_width=stroke_width, stroke_color=stroke_color, method="label")
+            text_clip = text_clip.set_start(t1)
+            text_clip = text_clip.set_end(t2)
+            text_clip = text_clip.set_position(position)
+            visual_clips.append(text_clip)
     
     video = CompositeVideoClip(visual_clips)
     
