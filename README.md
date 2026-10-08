@@ -1,6 +1,21 @@
 # 🔌 ConnectorHub
 
-A clean, minimal, and high-performance **AI Agent Connector Gateway & Hub**. Connect user accounts once, securely store credentials in SQLite (AES-256-GCM), and expose curated tool actions to AI agents via **Model Context Protocol (MCP)** and **REST /v1**.
+**An open-source, self-hosted integration gateway for AI agents.** Connect app accounts, keep credentials in your own runtime, and expose actions through **Model Context Protocol (MCP)** and a **REST API**.
+
+ConnectorHub is an early-stage open-source alternative for developers evaluating platforms such as [Composio](https://composio.dev/), [Nango](https://nango.dev/), [Merge.dev](https://www.merge.dev/), and [Arcade.dev](https://www.arcade.dev/). It focuses on a small, inspectable self-hosted stack: a FastAPI service, SQLite storage, an MCP interface, and a web console. The current built-in providers are GitHub, Slack, Hacker News, and custom HTTP.
+
+The project is still growing. It does not yet provide the breadth of maintained integrations, managed OAuth catalog, unified normalized APIs, or hosted operations offered by those established platforms. Use it when you want to run the integration layer yourself and extend the provider code to fit your agent.
+
+## Why ConnectorHub
+
+- **Run it yourself:** deploy the API and web console in your own environment.
+- **Keep credentials in your runtime:** stored API keys and tokens are encrypted with AES-256-GCM in SQLite.
+- **Use MCP or REST:** agents can discover available apps and actions, inspect action guides, and execute actions.
+- **Inspect and extend the code:** add providers and actions in Python without depending on a hosted integration catalog.
+
+## How it compares
+
+These products overlap in connecting apps to software and AI agents, but they solve different scopes. Composio focuses on a broad app toolkit and agent execution platform. Nango focuses on building and operating product integrations, including auth and sync. Merge.dev offers unified APIs with common data models across product integration categories. Arcade.dev focuses on agent-ready tools, authentication, and runtime controls. ConnectorHub is a smaller self-hosted project for teams who want to inspect and operate the gateway themselves. Compare their current offerings in the linked product documentation before choosing a platform.
 
 ---
 
