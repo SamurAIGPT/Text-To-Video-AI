@@ -53,9 +53,9 @@ class Config:
         errors = []
         
         llm_provider = os.getenv('LLM_PROVIDER', '').lower()
-        if llm_provider not in ['openai', 'groq', 'gemini']:
+        if llm_provider not in ['openai', 'groq', 'gemini', 'openrouter']:
             errors.append(
-                f"Invalid LLM_PROVIDER: '{llm_provider}'. Must be one of: openai, groq, gemini"
+                f"Invalid LLM_PROVIDER: '{llm_provider}'. Must be one of: openai, groq, gemini, openrouter"
             )
         
         if llm_provider == 'openai':
@@ -75,6 +75,12 @@ class Config:
                 errors.append("Missing required API key: GEMINI_API_KEY (required for LLM_PROVIDER=gemini)")
             if not os.getenv('GEMINI_MODEL'):
                 errors.append("Missing required configuration: GEMINI_MODEL (required for LLM_PROVIDER=gemini)")
+        
+        elif llm_provider == 'openrouter':
+            if not os.getenv('OPENROUTER_API_KEY'):
+                errors.append("Missing required API key: OPENROUTER_API_KEY (required for LLM_PROVIDER=openrouter)")
+            if not os.getenv('OPENROUTER_MODEL'):
+                errors.append("Missing required configuration: OPENROUTER_MODEL (required for LLM_PROVIDER=openrouter)")
         
         if not os.getenv('PEXELS_API_KEY') and not os.getenv('MUAPI_API_KEY'):
             errors.append("Missing required API key: PEXELS_API_KEY or MUAPI_API_KEY must be provided")
@@ -109,7 +115,7 @@ class Config:
             error_message += "\nPlease check your .env file and ensure all required keys are set."
             raise ConfigurationError(error_message)
     
-    def get_llm_provider(self) -> Literal['openai', 'groq', 'gemini']:
+    def get_llm_provider(self) -> Literal['openai', 'groq', 'gemini', 'openrouter']:
         return os.getenv('LLM_PROVIDER', '').lower()
     
     def get_llm_model(self) -> str:
@@ -120,6 +126,8 @@ class Config:
             return os.getenv('GROQ_MODEL', 'llama3-70b-8192')
         elif provider == 'gemini':
             return os.getenv('GEMINI_MODEL', 'gemini-2.5-flash')
+        elif provider == 'openrouter':
+            return os.getenv('OPENROUTER_MODEL', 'openai/gpt-4o')
         raise ConfigurationError(f"Unknown LLM provider: {provider}")
     
     def get_llm_client(self):
@@ -140,6 +148,11 @@ class Config:
             genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
             model_name = os.getenv('GEMINI_MODEL', 'gemini-2.5-flash')
             self._llm_client = genai.GenerativeModel(model_name)
+        elif provider == 'openrouter':
+            self._llm_client = OpenAI(
+                base_url="https://openrouter.ai/api/v1",
+                api_key=os.getenv('OPENROUTER_API_KEY')
+            )
         
         return self._llm_client
     
